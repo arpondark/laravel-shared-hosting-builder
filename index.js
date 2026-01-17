@@ -3,11 +3,12 @@ const path = require('path');
 const archiver = require('archiver');
 const { execSync } = require('child_process');
 
+const ZIP_NAME = 'uplod.zip';
+
 async function runDependencyInstallation(projectRoot) {
   console.log('\n📦 Installing dependencies...');
 
   try {
-    // Check if composer.json exists
     const composerJsonPath = path.join(projectRoot, 'composer.json');
     if (await fs.pathExists(composerJsonPath)) {
       console.log('▶ Running: composer install');
@@ -20,33 +21,31 @@ async function runDependencyInstallation(projectRoot) {
       console.log('⚠ composer.json not found, skipping composer install\n');
     }
 
-    // Check if package.json exists
     const packageJsonPath = path.join(projectRoot, 'package.json');
-    if (await fs.pathExists(packageJsonPath)) {
-      console.log('▶ Running: npm install');
-      execSync('npm install', {
-        cwd: projectRoot,
-        stdio: 'inherit'
-      });
-      console.log('✓ NPM dependencies installed\n');
-
-      // Check if build script exists in package.json
-      const packageJson = await fs.readJson(packageJsonPath);
-      if (packageJson.scripts && packageJson.scripts.build) {
-        console.log('▶ Running: npm run build');
-        execSync('npm run build', {
-          cwd: projectRoot,
-          stdio: 'inherit'
-        });
-        console.log('✓ NPM build completed\n');
-      } else {
-        console.log('⚠ No build script found in package.json, skipping npm run build\n');
-      }
-    } else {
-      console.log('⚠ package.json not found, skipping npm install\n');
+    if (!(await fs.pathExists(packageJsonPath))) {
+      throw new Error('package.json not found; cannot run npm build');
     }
+
+    const packageJson = await fs.readJson(packageJsonPath);
+    if (!packageJson.scripts || !packageJson.scripts.build) {
+      throw new Error('No build script found in package.json (expected "build")');
+    }
+
+    console.log('▶ Running: npm install');
+    execSync('npm install', {
+      cwd: projectRoot,
+      stdio: 'inherit'
+    });
+    console.log('✓ NPM dependencies installed');
+
+    console.log('▶ Running: npm run build');
+    execSync('npm run build', {
+      cwd: projectRoot,
+      stdio: 'inherit'
+    });
+    console.log('✓ Frontend build completed\n');
   } catch (error) {
-    throw new Error(`Dependency installation failed: ${error.message}`);
+    throw new Error(`Dependency installation or build failed: ${error.message}`);
   }
 }
 
@@ -75,17 +74,18 @@ async function build(options = {}) {
   const projectRoot = process.cwd();
   const distPath = path.join(projectRoot, 'dist');
   const laravelDistPath = path.join(distPath, 'laravel');
-  const zipPath = path.join(projectRoot, 'drac_upload.zip');
+  const zipPath = path.join(projectRoot, ZIP_NAME);
 
   console.log('🚀 Starting Laravel shared hosting build...');
   console.log(`📁 Project root: ${projectRoot}`);
   console.log(`📦 Dist folder: ${distPath}`);
+  console.log(`🗜  Zip name: ${ZIP_NAME}`);
 
   try {
-    // Install dependencies
+    console.log('[1/4] Building frontend assets...');
     await runDependencyInstallation(projectRoot);
 
-    // Clear Laravel caches
+    console.log('[2/4] Clearing Laravel caches...');
     await runArtisanOptimizeClear(projectRoot);
 
     if (clean) {
@@ -93,6 +93,7 @@ async function build(options = {}) {
       await fs.remove(distPath);
     }
 
+    console.log('[3/4] Preparing files for shared hosting...');
     await fs.ensureDir(distPath);
     await fs.ensureDir(laravelDistPath);
 
@@ -104,10 +105,13 @@ async function build(options = {}) {
     await cleanStorageFolders(laravelDistPath);
     await copyEnvExample(projectRoot, laravelDistPath);
 
+    console.log('[4/4] Creating ZIP archive...');
     await createZip(distPath, zipPath);
 
+    console.log('🧹 Cleaning up dist folder...');
+    await fs.remove(distPath);
+
     console.log('✅ Build completed successfully!');
-    console.log(`📦 Ready to deploy to shared hosting from: ${distPath}`);
     console.log(`🗜  Zip archive created at: ${zipPath}`);
   } catch (error) {
     console.error('❌ Build failed:', error.message);

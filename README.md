@@ -10,7 +10,7 @@ A CLI tool to prepare Laravel projects for deployment on shared hosting platform
 - Generates optimized `index.php` that loads Laravel from a subdirectory
 - Copies all necessary Laravel core files
 - Cleans storage folders (logs, sessions, cache) while preserving `.gitignore`
-- Produces `drac_upload.zip` for quick upload alongside the `dist/` folder
+- Produces `uplod.zip` for quick upload (dist folder is cleaned after packaging)
 - Supports maintenance mode
 - Cross-platform support (Linux, macOS, Windows)
 
@@ -94,7 +94,7 @@ dist/
 
 Additional output
 
-- `drac_upload.zip` (zip archive of `dist/`)
+- `uplod.zip` (zip archive of `dist/`)
 
 ## Deployment to Shared Hosting
 
