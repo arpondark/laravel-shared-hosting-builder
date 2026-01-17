@@ -170,37 +170,23 @@ async function cleanStorageFolders(laravelDistPath) {
     'framework/views'
   ];
 
-  for (const folder of foldersToClean) {
-    const folderPath = path.join(storagePath, folder);
-
+  async function cleanFolder(folderPath, folderName) {
     if (await fs.pathExists(folderPath)) {
       const files = await fs.readdir(folderPath);
-      
-      for (const file of files) {
-        const filePath = path.join(folderPath, file);
-        const stat = await fs.stat(filePath);
-        
-        if (stat.isFile() && file !== '.gitignore') {
-          await fs.unlink(filePath);
-        }
-      }
-      console.log(`  ✓ Cleaned ${folder}`);
+      await Promise.all(
+        files
+          .filter(file => file !== '.gitignore')
+          .map(file => fs.unlink(path.join(folderPath, file)))
+      );
+      console.log(`  ✓ Cleaned ${folderName}`);
     }
   }
 
-  const frameworkPath = path.join(storagePath, 'framework');
-  if (await fs.pathExists(frameworkPath)) {
-    const files = await fs.readdir(frameworkPath);
-    
-    for (const file of files) {
-      const filePath = path.join(frameworkPath, file);
-      const stat = await fs.stat(filePath);
-      
-      if (stat.isFile() && file !== '.gitignore') {
-        await fs.unlink(filePath);
-      }
-    }
+  for (const folder of foldersToClean) {
+    await cleanFolder(path.join(storagePath, folder), folder);
   }
+
+  await cleanFolder(path.join(storagePath, 'framework'), 'framework');
 }
 
 async function copyEnvExample(projectRoot, laravelDistPath) {

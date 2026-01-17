@@ -7,7 +7,9 @@
     "laravel-shb": "./bin/cli.js"
   },
   "scripts": {
-    "test": "node bin/cli.js --help"
+    "test": "node bin/cli.js --help",
+    "build": "node bin/cli.js build",
+    "build:clean": "node bin/cli.js build --clean"
   },
   "keywords": [
     "laravel",
