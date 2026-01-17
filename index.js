@@ -11,7 +11,7 @@ async function runDependencyInstallation(projectRoot) {
     const composerJsonPath = path.join(projectRoot, 'composer.json');
     if (await fs.pathExists(composerJsonPath)) {
       console.log('▶ Running: composer install');
-      execSync('composer install --no-dev --optimize-autoloader', {
+      execSync('composer install', {
         cwd: projectRoot,
         stdio: 'inherit'
       });

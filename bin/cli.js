@@ -6,7 +6,7 @@ const { build } = require('../index');
 program
   .name('laravel-shb')
   .description('Prepare Laravel projects for shared hosting deployment')
-  .version('1.2.0');
+  .version('1.2.1');
 
 program.command('build')
   .description('Build Laravel project for shared hosting deployment')
