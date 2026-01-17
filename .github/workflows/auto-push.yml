@@ -4,19 +4,15 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - 'index.js'
-      - 'bin/**'
-      - 'templates/**'
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   auto-commit-and-push:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     
     permissions:
       contents: write
@@ -25,8 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,34 +33,30 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps || npm install
         
-      - name: Check for changes
+      - name: Check for uncommitted changes
         id: verify
         run: |
-          if git diff --quiet; then
-            echo "No changes detected"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
-            echo "Changes detected"
+          if [[ -n $(git status -s) ]]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
           fi
           
-      - name: Commit changes
+      - name: Commit and push changes
         if: steps.verify.outputs.has_changes == 'true'
         run: |
           git add -A
-          git commit -m "chore: auto-push package changes [skip ci]" || echo "No changes to commit"
-          
-      - name: Push changes
-        if: steps.verify.outputs.has_changes == 'true'
-        run: |
-          git push origin ${{ github.ref }} || echo "Nothing to push"
+          git commit -m "chore: auto-push package changes [skip ci]" || true
+          git push origin main || true
 
   publish-to-npm:
     needs: auto-commit-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     
     permissions:
       contents: read
@@ -81,9 +72,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps || npm install
         
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public || echo "Package already published at this version"
+        run: npm publish || echo "Package already published at this version"
