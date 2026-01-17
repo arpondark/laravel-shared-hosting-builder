@@ -227,7 +227,14 @@ async function cleanStorageFolders(laravelDistPath) {
       await Promise.all(
         files
           .filter(file => file !== '.gitignore')
-          .map(file => fs.unlink(path.join(folderPath, file)))
+          .map(async (file) => {
+            const itemPath = path.join(folderPath, file);
+            try {
+              await fs.remove(itemPath);
+            } catch (error) {
+              console.warn(`  ⚠ Failed to remove ${file}: ${error.message}`);
+            }
+          })
       );
       console.log(`  ✓ Cleaned ${folderName}`);
     }
