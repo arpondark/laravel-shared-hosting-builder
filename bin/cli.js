@@ -4,7 +4,7 @@ const { program } = require('commander');
 const { build } = require('../index');
 
 program
-  .name('laravel')
+  .name('laravel-shb')
   .description('Prepare Laravel projects for shared hosting deployment')
   .version('1.0.0');
 

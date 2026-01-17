@@ -29,7 +29,7 @@ npm install laravel-shared-hosting-builder
 ### Using npx (No Installation Required)
 
 ```bash
-npx laravel build
+npx laravel-shb build
 ```
 
 ## Usage
@@ -39,19 +39,19 @@ npx laravel build
 Navigate to your Laravel project root directory and run:
 
 ```bash
-npx laravel build
+npx laravel-shb build
 ```
 
 Or if installed globally:
 
 ```bash
-laravel build
+laravel-shb build
 ```
 
 ### Options
 
 ```bash
-npx laravel build [options]
+npx laravel-shb build [options]
 ```
 
 **Options:**
@@ -63,7 +63,7 @@ npx laravel build [options]
 ### Example with Clean Build
 
 ```bash
-npx laravel build --clean
+npx laravel-shb build --clean
 ```
 
 ## What Gets Built
@@ -96,7 +96,7 @@ dist/
 
 1. Run the build command in your local Laravel project:
    ```bash
-   npx laravel build
+   npx laravel-shb build
    ```
 
 2. Upload the contents of the `dist/` folder to your hosting's `public_html` directory using:
