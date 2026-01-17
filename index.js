@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const archiver = require('archiver');
 const { execSync } = require('child_process');
 
 async function runDependencyInstallation(projectRoot) {
@@ -49,11 +50,32 @@ async function runDependencyInstallation(projectRoot) {
   }
 }
 
+async function runArtisanOptimizeClear(projectRoot) {
+  console.log('🧹 Clearing Laravel caches...');
+
+  const artisanPath = path.join(projectRoot, 'artisan');
+  if (!(await fs.pathExists(artisanPath))) {
+    console.log('⚠ artisan file not found, skipping php artisan optimize:clear\n');
+    return;
+  }
+
+  try {
+    execSync('php artisan optimize:clear', {
+      cwd: projectRoot,
+      stdio: 'inherit'
+    });
+    console.log('✓ Laravel caches cleared\n');
+  } catch (error) {
+    throw new Error(`php artisan optimize:clear failed: ${error.message}`);
+  }
+}
+
 async function build(options = {}) {
   const { clean = false } = options;
   const projectRoot = process.cwd();
   const distPath = path.join(projectRoot, 'dist');
   const laravelDistPath = path.join(distPath, 'laravel');
+  const zipPath = path.join(projectRoot, 'drac_upload.zip');
 
   console.log('🚀 Starting Laravel shared hosting build...');
   console.log(`📁 Project root: ${projectRoot}`);
@@ -62,6 +84,9 @@ async function build(options = {}) {
   try {
     // Install dependencies
     await runDependencyInstallation(projectRoot);
+
+    // Clear Laravel caches
+    await runArtisanOptimizeClear(projectRoot);
 
     if (clean) {
       console.log('🧹 Cleaning dist folder...');
@@ -79,8 +104,11 @@ async function build(options = {}) {
     await cleanStorageFolders(laravelDistPath);
     await copyEnvExample(projectRoot, laravelDistPath);
 
+    await createZip(distPath, zipPath);
+
     console.log('✅ Build completed successfully!');
     console.log(`📦 Ready to deploy to shared hosting from: ${distPath}`);
+    console.log(`🗜  Zip archive created at: ${zipPath}`);
   } catch (error) {
     console.error('❌ Build failed:', error.message);
     process.exit(1);
@@ -135,29 +163,22 @@ async function createDistIndexPhp(distPath) {
 function getDefaultIndexPhpTemplate() {
   return `<?php
 
+use Illuminate\\Foundation\\Application;
+use Illuminate\\Http\\Request;
+
 define('LARAVEL_START', microtime(true));
 
-if (file_exists(__DIR__ . '/laravel/storage/framework/maintenance.php')) {
-    require __DIR__ . '/laravel/storage/framework/maintenance.php';
+if (file_exists($maintenance = __DIR__ . '/laravel/storage/framework/maintenance.php')) {
+    require $maintenance;
 }
 
 require __DIR__ . '/laravel/vendor/autoload.php';
 
 $app = require_once __DIR__ . '/laravel/bootstrap/app.php';
 
-$app->bind('request', function () {
-    return Illuminate\\Http\\Request::capture();
-});
+$app->usePublicPath(__DIR__);
 
-$kernel = $app->make(Illuminate\\Contracts\\Http\\Kernel::class);
-
-$response = $kernel->handle(
-    $request = Illuminate\\Http\\Request::capture()
-);
-
-$response->send();
-
-$kernel->terminate($request, $response);
+$app->handleRequest(Request::capture());
 `;
 }
 
@@ -265,6 +286,31 @@ async function copyEnvExample(projectRoot, laravelDistPath) {
   }
 
   console.log('  ⚠ No .env.example or .env.production_example found, skipping...');
+}
+
+async function createZip(distPath, zipPath) {
+  console.log('🗜  Creating deployment zip...');
+
+  if (!(await fs.pathExists(distPath))) {
+    throw new Error('dist folder not found, nothing to zip');
+  }
+
+  await fs.remove(zipPath);
+
+  await new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(zipPath);
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    output.on('close', resolve);
+    output.on('error', reject);
+    archive.on('error', reject);
+
+    archive.pipe(output);
+    archive.directory(distPath + path.sep, false);
+    archive.finalize();
+  });
+
+  console.log('  ✓ Deployment zip created');
 }
 
 module.exports = { build };

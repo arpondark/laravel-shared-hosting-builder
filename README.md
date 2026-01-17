@@ -5,10 +5,12 @@ A CLI tool to prepare Laravel projects for deployment on shared hosting platform
 ## Features
 
 - Automatically packages Laravel projects for shared hosting
+- Runs `php artisan optimize:clear` to reset caches before packaging
 - Copies public files to `dist/` directory
 - Generates optimized `index.php` that loads Laravel from a subdirectory
 - Copies all necessary Laravel core files
 - Cleans storage folders (logs, sessions, cache) while preserving `.gitignore`
+- Produces `drac_upload.zip` for quick upload alongside the `dist/` folder
 - Supports maintenance mode
 - Cross-platform support (Linux, macOS, Windows)
 
@@ -90,6 +92,10 @@ dist/
     └── .env.example          (from .env.production_example if available)
 ```
 
+Additional output
+
+- `drac_upload.zip` (zip archive of `dist/`)
+
 ## Deployment to Shared Hosting
 
 ### For Hostinger / cPanel
@@ -99,7 +105,7 @@ dist/
    npx laravel-shb build
    ```
 
-2. Upload the contents of the `dist/` folder to your hosting's `public_html` directory using:
+2. Upload the contents of the `dist/` folder (or the generated `drac_upload.zip`) to your hosting's `public_html` directory using:
    - FTP client (FileZilla, etc.)
    - File Manager in cPanel
    - Git deployment (if available)
