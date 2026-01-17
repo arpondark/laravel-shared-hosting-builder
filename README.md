@@ -238,6 +238,25 @@ MIT
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Clone the Repository
+
+```bash
+git clone https://github.com/arpondark/laravel-shared-hosting-builder.git
+cd laravel-shared-hosting-builder
+```
+
+### Setup for Development
+
+```bash
+npm install
+npm link  # to test locally
+```
+
+## Repository
+
+- **GitHub**: [https://github.com/arpondark/laravel-shared-hosting-builder](https://github.com/arpondark/laravel-shared-hosting-builder)
+- **NPM Package**: [laravel-shared-hosting-builder](https://www.npmjs.com/package/laravel-shared-hosting-builder)
+
 ## Support
 
-If you encounter any issues or have questions, please open an issue on the GitHub repository.
+If you encounter any issues or have questions, please open an issue on the [GitHub repository](https://github.com/arpondark/laravel-shared-hosting-builder/issues).

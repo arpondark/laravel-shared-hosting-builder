@@ -29,10 +29,10 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/arpondark/laravel-shared-hosting-builder"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/arpondark/laravel-shared-hosting-builder/issues"
   },
-  "homepage": ""
+  "homepage": "https://github.com/arpondark/laravel-shared-hosting-builder"
 }

@@ -74,6 +74,13 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps || npm install
         
+      - name: Ensure README.md is included
+        run: |
+          if [ ! -f README.md ]; then
+            echo "README.md not found"
+            exit 1
+          fi
+        
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
