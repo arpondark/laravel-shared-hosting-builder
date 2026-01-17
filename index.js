@@ -1,5 +1,53 @@
 const fs = require('fs-extra');
 const path = require('path');
+const { execSync } = require('child_process');
+
+async function runDependencyInstallation(projectRoot) {
+  console.log('\n📦 Installing dependencies...');
+
+  try {
+    // Check if composer.json exists
+    const composerJsonPath = path.join(projectRoot, 'composer.json');
+    if (await fs.pathExists(composerJsonPath)) {
+      console.log('▶ Running: composer install');
+      execSync('composer install --no-dev --optimize-autoloader', {
+        cwd: projectRoot,
+        stdio: 'inherit'
+      });
+      console.log('✓ Composer dependencies installed\n');
+    } else {
+      console.log('⚠ composer.json not found, skipping composer install\n');
+    }
+
+    // Check if package.json exists
+    const packageJsonPath = path.join(projectRoot, 'package.json');
+    if (await fs.pathExists(packageJsonPath)) {
+      console.log('▶ Running: npm install');
+      execSync('npm install', {
+        cwd: projectRoot,
+        stdio: 'inherit'
+      });
+      console.log('✓ NPM dependencies installed\n');
+
+      // Check if build script exists in package.json
+      const packageJson = await fs.readJson(packageJsonPath);
+      if (packageJson.scripts && packageJson.scripts.build) {
+        console.log('▶ Running: npm run build');
+        execSync('npm run build', {
+          cwd: projectRoot,
+          stdio: 'inherit'
+        });
+        console.log('✓ NPM build completed\n');
+      } else {
+        console.log('⚠ No build script found in package.json, skipping npm run build\n');
+      }
+    } else {
+      console.log('⚠ package.json not found, skipping npm install\n');
+    }
+  } catch (error) {
+    throw new Error(`Dependency installation failed: ${error.message}`);
+  }
+}
 
 async function build(options = {}) {
   const { clean = false } = options;
@@ -12,6 +60,9 @@ async function build(options = {}) {
   console.log(`📦 Dist folder: ${distPath}`);
 
   try {
+    // Install dependencies
+    await runDependencyInstallation(projectRoot);
+
     if (clean) {
       console.log('🧹 Cleaning dist folder...');
       await fs.remove(distPath);
