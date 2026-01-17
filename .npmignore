@@ -1,0 +1,11 @@
+dist/
+.DS_Store
+*.log
+.vscode/
+.idea/
+.env
+*.swp
+*.swo
+*~
+test/
+tests/

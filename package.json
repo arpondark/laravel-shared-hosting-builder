@@ -1,0 +1,38 @@
+{
+  "name": "laravel-shared-hosting-builder",
+  "version": "1.0.0",
+  "description": "A CLI tool to prepare Laravel projects for shared hosting deployment (Hostinger/cPanel)",
+  "main": "index.js",
+  "bin": {
+    "laravel": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node bin/cli.js --help"
+  },
+  "keywords": [
+    "laravel",
+    "shared-hosting",
+    "cpanel",
+    "hostinger",
+    "deployment",
+    "cli",
+    "build"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": {
+    "url": ""
+  },
+  "homepage": ""
+}
