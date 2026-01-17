@@ -192,6 +192,7 @@ php laravel/artisan up
 ```
 
 ## Development
+BY MD. SHAZAN MAHMUD ARPON
 
 ### Building the Package Locally
 
@@ -240,4 +241,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
-n
