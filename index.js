@@ -108,10 +108,8 @@ async function build(options = {}) {
     console.log('[4/4] Creating ZIP archive...');
     await createZip(distPath, zipPath);
 
-    console.log('🧹 Cleaning up dist folder...');
-    await fs.remove(distPath);
-
     console.log('✅ Build completed successfully!');
+    console.log(`📁 Dist folder: ${distPath}`);
     console.log(`🗜  Zip archive created at: ${zipPath}`);
   } catch (error) {
     console.error('❌ Build failed:', error.message);

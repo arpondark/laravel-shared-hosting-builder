@@ -6,11 +6,12 @@ A CLI tool to prepare Laravel projects for deployment on shared hosting platform
 
 - Automatically packages Laravel projects for shared hosting
 - Runs `php artisan optimize:clear` to reset caches before packaging
-- Copies public files to `dist/` directory
+- Creates `dist/` directory with all deployment files
 - Generates optimized `index.php` that loads Laravel from a subdirectory
-- Copies all necessary Laravel core files
+- Copies all necessary Laravel core files with correct .htaccess configuration
 - Cleans storage folders (logs, sessions, cache) while preserving `.gitignore`
-- Produces `uplod.zip` for quick upload (dist folder is cleaned after packaging)
+- Produces `uplod.zip` for quick upload (extracts directly without dist folder wrapper)
+- Keeps `dist/` folder for inspection after building
 - Supports maintenance mode
 - Cross-platform support (Linux, macOS, Windows)
 
@@ -92,9 +93,12 @@ dist/
     └── .env.example          (from .env.production_example if available)
 ```
 
-Additional output
+**Additional Output:**
 
-- `uplod.zip` (zip archive of `dist/`)
+- `uplod.zip` - Zip archive containing all files from `dist/` folder
+  - When extracted, files are placed directly at the extraction location (no `dist/` wrapper folder)
+  - Ready to upload to shared hosting root directory
+- `dist/` folder - Remains in your project for inspection and manual deployment if needed
 
 ## Deployment to Shared Hosting
 
