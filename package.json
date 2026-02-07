@@ -1,6 +1,6 @@
 {
   "name": "laravel-shared-hosting-builder",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "A CLI tool to prepare Laravel projects for shared hosting deployment (Hostinger/cPanel)",
   "main": "index.js",
   "bin": {
